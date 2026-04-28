@@ -5,10 +5,20 @@ import java.util.Scanner;
 public class Main {
 
     static String welcomeString = "=".repeat(50) + '\n' + "Welcome to TicTacToe in Java!" + '\n' + "=".repeat(50);
-    static char[][] board = {{'1', '2', '3'}, {'4', '5', '6'}, {'7', '8', '9'}}; // 0 is blank, X is player1 or user, O is player2 or computer
-    static Boolean player1 = true;
+    // 0 is blank, X is player1 or user, O is player2 or computer
+    static char[][] board = {{'1', '2', '3'}, {'4', '5', '6'}, {'7', '8', '9'}};
+    static boolean player1 = true;
 
-    public static Boolean checkGame(char[][] args) {
+    public static void resetBoard() {
+        char counter = '1';
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < 3; j++) {
+                board[i][j] = counter++;
+            }
+        }
+    }
+
+    public static boolean checkGame() {
         return (board[0][0] == board[0][1] && board[0][1] == board[0][2])
                 || (board[1][0] == board[1][1] && board[1][1] == board[1][2])
                 || (board[2][0] == board[2][1] && board[2][1] == board[2][2])
@@ -19,42 +29,60 @@ public class Main {
                 || (board[0][2] == board[1][1] && board[1][1] == board[2][0]);
     }
 
-    public static void printBoard(char[][] args) {
-        for (char[] boardRow : board) {
-            for (int j = 0; j < boardRow.length; j++) {
-                System.out.print("|" + boardRow[j] + "|");
+    public static void printBoard() {
+        for (char[] row : board) {
+            for (char cell : row) {
+                System.out.print("|" + cell + "|");
             }
             System.out.println("\n");
         }
     }
 
-    public static void replace(char[][] board, char target, char newValue) {
-        for (char[] boardRow : board) {
-            for (int j = 0; j < boardRow.length; j++) {
-                if (boardRow[j] == target) {
-                    boardRow[j] = newValue;
+    public static boolean replace(char target, char newValue) {
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < 3; j++) {
+                if (board[i][j] == target && target != 'X' && target != 'O') {
+                    board[i][j] = newValue;
+                    return true;
                 }
             }
         }
+        return false;
     }
 
     public static void selfGame() {
         Scanner sc = new Scanner(System.in);
+        resetBoard();
+        player1 = true;
+        int moves = 0;
+
         while (true) {
-            char playerBoardCharacter = player1 ? 'X' : 'O';
-            System.out.println("\nTurn of: " + playerBoardCharacter);
-            printBoard(board);
+            char playerChar = player1 ? 'X' : 'O';
+            System.out.println("\nTurn of: " + playerChar);
+            printBoard();
             System.out.print("You place it at: ");
-            char newPositionInput = sc.nextLine().trim().charAt(0);
-            if (newPositionInput != 'X' && newPositionInput != 'O') {
-                replace(board, newPositionInput, playerBoardCharacter);
+            
+            String input = sc.nextLine().trim();
+            if (input.isEmpty()) continue;
+            
+            char choice = input.charAt(0);
+
+            if (replace(choice, playerChar)) {
+                moves++;
+                if (checkGame()) {
+                    printBoard();
+                    System.out.println("=".repeat(50) + '\n' + playerChar + " WINS!!" + '\n' + "=".repeat(50));
+                    break;
+                }
+                if (moves == 9) {
+                    printBoard();
+                    System.out.println("It's a draw!");
+                    break;
+                }
+                player1 = !player1;
+            } else {
+                System.out.println("Invalid move, try again.");
             }
-            if (checkGame(board)) {
-                printBoard(board);
-                System.out.println("=".repeat(50) + '\n' + playerBoardCharacter + " "+ "WINS!!" + '\n' + "=".repeat(50) + '\n');
-                break;
-            }
-            player1 = !player1;
         }
     }
 
@@ -68,8 +96,9 @@ public class Main {
         while (true) {
             System.out.println(welcomeString);
             System.out.print("Press 0 to play with yourself, 1 to play with Computer and other to quit: ");
-            String UserInput = sc.nextLine().trim();
-            switch (UserInput) {
+            String userInput = sc.nextLine().trim();
+
+            switch (userInput) {
                 case "0":
                     selfGame();
                     break;
@@ -81,6 +110,5 @@ public class Main {
                     break OUTER;
             }
         }
-
     }
 }
